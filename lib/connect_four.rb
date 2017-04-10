@@ -19,6 +19,12 @@ class ConnectFourBoard
   end
 
   def display
+    board.each do |row|
+      row.each do |e|
+        print(e)
+      end
+      puts
+    end
   end
 
   private

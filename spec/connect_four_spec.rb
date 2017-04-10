@@ -48,4 +48,12 @@ describe "ConnectFourBoard" do
       end
     end
   end
+
+  describe '.display' do
+    context "Create a new board" do
+      it "displays a 4 x 4 board of '.'" do
+        expect{a_board.display}.to output("....\n....\n....\n....\n").to_stdout
+      end
+    end
+  end
 end
