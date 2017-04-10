@@ -10,7 +10,8 @@ class ConnectFourBoard
   end
 
   def place_token(token, row, col)
-    return false unless valid_pos?(row, col)
+    raise ArgumentError.new("Row/Col must be between 0 and 3") \
+      unless valid_pos?(row, col)
 
     board[row][col] = token
 

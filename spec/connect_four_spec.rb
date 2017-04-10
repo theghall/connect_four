@@ -17,38 +17,33 @@ describe "ConnectFourBoard" do
   it {expect(a_board).to respond_to(:display)}
 
   describe ".place_token" do
-    let!(:a_board) { ConnectFourBoard.new }
-
     context "Place any color token on -1,1" do
-      it "returns 'false'" do
-         expect(a_board.place_token('B',-1,1)).to eql(false)
+      it "raise ArgumentError" do
+         expect{a_board.place_token('B',-1,1)}.to raise_error(ArgumentError)
       end
     end
 
     context "Place any color token on 1,-1" do
-      it "returns 'false'" do
-         expect(a_board.place_token('B',1,-1)).to eql(false)
+      it "raises ArgumentError" do
+         expect{a_board.place_token('B',1,-1)}.to raise_error(ArgumentError)
       end
     end
 
     context "Place any color token on 5,1" do
-      it "returns 'false'" do
-         expect(a_board.place_token('B',5,1)).to eql(false)
+      it "raises ArgumentError" do
+         expect{a_board.place_token('B',5,1)}.to raise_error(ArgumentError)
       end
     end
 
     context "Place any color token on 1,5" do
-      it "returns 'false'" do
-         expect(a_board.place_token('B',1,5)).to eql(false)
+      it "raise ArgumentEror" do
+         expect{a_board.place_token('B',1,5)}.to raise_error(ArgumentError)
       end
     end
 
     context "Place 'B' token on 1,1" do
-      it "returns 'true'" do
+      it "returns 'true' and board[1][1] == 'B'" do
         expect(a_board.place_token('B',1,1)).to eql(true)
-      end
-
-      it "square 1,1 is 'B'" do
         expect(a_board.board[1][1]).to eql('B')
       end
     end
