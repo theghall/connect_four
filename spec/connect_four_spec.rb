@@ -1,7 +1,7 @@
 # connect-four.spec
 #
 # 20170408 GH
-require 'connect_four'
+require 'connect_four_board'
 
 describe "ConnectFourBoard" do
   let(:c4_array) {Array.new(4) {Array.new(4, '.')}}

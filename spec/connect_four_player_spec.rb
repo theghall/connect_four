@@ -2,9 +2,9 @@
 #
 # 20170411	GH
 #
-require 'player'
+require 'connect_four_player'
 
-describe "Player" do
+describe "ConnectFourPlayer" do
   describe "attributes" do
     let(:a_player) { Player.new }
 
