@@ -2,6 +2,7 @@
 #
 # 20170408	GH
 #
+require 'byebug'
 module ConnectFour
 
   class ConnectFourBoard
@@ -11,13 +12,23 @@ module ConnectFour
      @board = Array.new(4) {Array.new(4, '.')}
    end
 
-   def place_token(token, row, col)
-     raise ArgumentError.new("Row/Col must be between 0 and 3") \
-       unless valid_pos?(row, col)
+   def place_token(token, col)
+     raise ArgumentError.new("Col must be between 0 and 3") unless valid_pos?(col)
 
-     board[row][col] = token
+     placed_token = false
 
-     true
+     last_empty_pos = -1
+
+     board.each_with_index do |row, index|
+       last_empty_pos = index if row[col] == '.'
+     end
+
+     if last_empty_pos != -1
+       board[last_empty_pos][col] = token
+       placed_token = true
+     end
+
+     placed_token
    end
 
    def display
@@ -33,8 +44,8 @@ module ConnectFour
 
    attr_writer :board
 
-   def valid_pos?(row, col)
-     return row.between?(0, 3) && col.between?(0, 3)
+   def valid_pos?(col)
+     return col.between?(0, 3)
    end
   end
 
@@ -49,16 +60,14 @@ module ConnectFour
 
    def take_turn(board, judge)
      loop do
-       print("Enter position: ")
+       print("Enter col: ")
 
-       pos = gets.chomp
-
-       ary = pos.split(',').map{ |e| e.to_i }
+       col = gets.chomp
 
        begin
-         token_placed = board.place_token(token, ary[0], ary[1]) if judge.valid_move?(ary[0], ary[1])
+         token_placed = board.place_token(token, col.to_i) if judge.valid_move?(col.to_i)
        rescue ArgumenError => e
-         puts('Choose another position')
+         puts('Choose another column')
        end
 
        break if token_placed
@@ -68,5 +77,27 @@ module ConnectFour
    private
   
    attr_writer :name, :token
- end
+  end
+
+  class ConnectFourJudge
+    attr_reader :board, :player1, :player2
+
+    def intialize(board, player1, player2)
+      @board = board
+
+      @player1 = player1
+
+      @player2 = player2
+    end
+
+    def valid_move
+    end
+
+    def help
+    end
+
+    private
+
+    attr_writer :board, :player1, :player2
+  end
 end

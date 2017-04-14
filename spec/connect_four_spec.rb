@@ -17,34 +17,22 @@ describe "ConnectFourBoard" do
   it {expect(a_board).to respond_to(:display)}
 
   describe ".place_token" do
-    context "Place any color token on -1,1" do
+    context "Place any color token on column -1" do
       it "raise ArgumentError" do
-         expect{a_board.place_token('B',-1,1)}.to raise_error(ArgumentError)
+         expect{a_board.place_token('B',-1)}.to raise_error(ArgumentError)
       end
     end
 
-    context "Place any color token on 1,-1" do
+    context "Place any color token on column 4" do
       it "raises ArgumentError" do
-         expect{a_board.place_token('B',1,-1)}.to raise_error(ArgumentError)
+         expect{a_board.place_token('B',4)}.to raise_error(ArgumentError)
       end
     end
 
-    context "Place any color token on 5,1" do
-      it "raises ArgumentError" do
-         expect{a_board.place_token('B',5,1)}.to raise_error(ArgumentError)
-      end
-    end
-
-    context "Place any color token on 1,5" do
-      it "raise ArgumentEror" do
-         expect{a_board.place_token('B',1,5)}.to raise_error(ArgumentError)
-      end
-    end
-
-    context "Place 'B' token on 1,1" do
-      it "returns 'true' and board[1][1] == 'B'" do
-        expect(a_board.place_token('B',1,1)).to eql(true)
-        expect(a_board.board[1][1]).to eql('B')
+    context "Place 'B' token on column 0" do
+      it "returns 'true' and board[2][0] == 'B'" do
+        expect(a_board.place_token('B',0)).to eql(true)
+        expect(a_board.board[3][0]).to eql('B')
       end
     end
   end
@@ -95,15 +83,15 @@ describe "ConnectFourPlayer" do
 #      end
 #    end
 
-    context "enter a valid move of 0,0 and token 'B', board is set correctly" do
+    context "enter a valid move of column 0 and token 'B', board is set correctly" do
 
-      it "sets 0,0 to 'B'" do 
+      it "sets 3,0 to 'B'" do 
         a_judge = double('ConnectFourJudge')
         allow(a_judge).to receive(:valid_move?).and_return(true)
-        allow(a_player).to receive(:gets).and_return('0,0')
+        allow(a_player).to receive(:gets).and_return('0')
 
         a_player.take_turn(a_board, a_judge)
-        expect{a_board.display}.to output("B...\n....\n....\n....\n").to_stdout
+        expect{a_board.display}.to output("....\n....\n....\nB...\n").to_stdout
       end
     end
   end
@@ -155,6 +143,19 @@ describe "ConnectFourJudge" do
   context "Create a new judge" do
     it "properly stores player2 object" do
       expect(a_judge.player1).to eql(player2)
+    end
+  end
+ end
+
+ describe ".help" do
+  let(:a_board) {ConnectFour::ConnectFourBoard.new}
+  let(:player1) {ConnectFour::ConnectFourPlayer.new('John','B')}
+  let(:player2) {ConnectFour::ConnectFourPlayer.new('Jane','R')}
+  let(:a_judge) {ConnectFour::ConnectFourJudge.new(a_board, player1, player2)} 
+
+  context "when player asks for help" do
+    it "dispalys help" do
+      expect{a_judge.help}.to output("Connect four is a game in which two players\n take turns placing their tokens at the top\nof one of four columns.  The player who\ngets 4 in a row horizontally, vertically or\ndiagonally wins the game.\nIf all the tokens are placed and there is no winner the game\nis a draw.").to_stdout
     end
   end
  end
