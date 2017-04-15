@@ -32,6 +32,8 @@ module ConnectFour
    end
 
    def display
+     puts("0123")
+     puts("----")
      board.each do |row|
        row.each do |e|
          print(e)
@@ -66,8 +68,10 @@ module ConnectFour
 
        begin
          token_placed = board.place_token(token, col.to_i) if judge.valid_move?(col.to_i)
+
+         puts("That column is full, choose another.") unless token_placed
        rescue ArgumenError => e
-         puts('Choose another column')
+         puts('Enter a valid column')
        end
 
        break if token_placed
@@ -101,29 +105,31 @@ module ConnectFour
     end
 
     def judge_game
-      self.game_over = false
+      game_over = false
 
       winner = false
 
       active_player = player1
 
-      while !self.game_over
+      while !game_over
         board.display
 
         active_player.take_turn(board, self)
 
-        self.turn += 1
+        self.turn = self.turn + 1
 
-        self.winner = winner?(active_player.token)
+        winner = winner?(active_player.token)
 
         draw = (turn == 16 && !winner)
 
-        self.game_over = winner || draw
+        game_over = winner || draw
 
-        active_player = (active_player == player1 ? player2 : player1) unless self.game_over
+        active_player = (active_player == player1 ? player2 : player1) unless game_over
       end
 
-      if self.winner
+      board.display
+
+      if winner
         puts("#{active_player.name} is the winner!")
       else
         puts("The game is a draw!")
@@ -153,7 +159,7 @@ END_HELP
 
       for x in 0..3
         num_in_col = board.board.flatten.each_with_index.select \
-          { |t,i| t == token && (i == 0 + x || i == 4 + x || i == 8 + x) || i == 12 + x }.length
+          { |t,i| t == token && (i == 0 + x || i == 4 + x || i == 8 + x || i == 12 + x) }.length
 
         col_wins = (num_in_col == 4)
 
@@ -162,11 +168,9 @@ END_HELP
       end
 
       col_wins
-
     end
 
     def row_wins?(token)
-
       row_wins = false
 
       for x in 0..3 
@@ -180,18 +184,24 @@ END_HELP
       end
 
       row_wins
-
     end
 
     def diagonal_wins?(token)
-
       diag_wins = false
 
       num_in_diagonal = board.board.flatten.each_with_index.select \
-          { |t,i| t == token && (i % 5 == 0 || i % 3 == 0) }
+        { |t,i| t == token && (i == 0 || i == 5 || i == 10 || i == 15) }.length
 
       diag_wins = (num_in_diagonal == 4)
 
+      if !diag_wins
+        num_in_diagonal = board.board.flatten.each_with_index.select \
+          { |t,i| t == token && (i == 3 || i == 6 || i == 9 || i == 12) }.length
+
+        diag_wins = (num_in_diagonal == 4)
+      end
+         
+      diag_wins
     end
 
     def winner?(token)

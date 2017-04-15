@@ -83,7 +83,7 @@ describe "ConnectFourBoard" do
   describe '.display' do
     context "Create a new board" do
       it "displays a 4 x 4 board of '.'" do
-        expect{a_board.display}.to output("....\n....\n....\n....\n").to_stdout
+        expect{a_board.display}.to output("0123\n----\n....\n....\n....\n....\n").to_stdout
       end
     end
   end
@@ -113,18 +113,16 @@ describe "ConnectFourPlayer" do
     let(:a_board) {ConnectFour::ConnectFourBoard.new}
     let(:a_player) {ConnectFour::ConnectFourPlayer.new('Gary', 'B')}
 
-#    Loop probably prevents this test from working
-#
-#    context "enter a move that judge says is invalid" do
-#
-#      it "asks for another move" do 
-#        a_judge = double('ConnectFourJudge')
-#        allow(a_judge).to receive(:valid_move?).and_return(false)
-#        allow(a_player).to receive(:gets).and_return('0')
-#
-#        expect{a_player.take_turn(a_board, a_judge)}.to output('Choose another position').to_stdout
-#      end
-#    end
+    context "enter a move that judge says is invalid" do
+
+      it "asks for another move" do 
+        a_judge = double('ConnectFourJudge')
+        allow(a_judge).to receive(:valid_move?).and_return(false, true)
+        allow(a_player).to receive(:gets).and_return('0','0')
+
+        expect{a_player.take_turn(a_board, a_judge)}.to output(/That column is full, choose another/).to_stdout
+      end
+    end
 
     context "enter a valid move of column 0 4 time and token 'B', board is set correctly" do
 
@@ -134,13 +132,13 @@ describe "ConnectFourPlayer" do
         allow(a_player).to receive(:gets).and_return('0')
 
         a_player.take_turn(a_board, a_judge)
-        expect{a_board.display}.to output("....\n....\n....\nB...\n").to_stdout
+        expect{a_board.display}.to output("0123\n----\n....\n....\n....\nB...\n").to_stdout
         a_player.take_turn(a_board, a_judge)
-        expect{a_board.display}.to output("....\n....\nB...\nB...\n").to_stdout
+        expect{a_board.display}.to output("0123\n----\n....\n....\nB...\nB...\n").to_stdout
         a_player.take_turn(a_board, a_judge)
-        expect{a_board.display}.to output("....\nB...\nB...\nB...\n").to_stdout
+        expect{a_board.display}.to output("0123\n----\n....\nB...\nB...\nB...\n").to_stdout
         a_player.take_turn(a_board, a_judge)
-        expect{a_board.display}.to output("B...\nB...\nB...\nB...\n").to_stdout
+        expect{a_board.display}.to output("0123\n----\nB...\nB...\nB...\nB...\n").to_stdout
       end
     end
   end
@@ -256,7 +254,34 @@ describe "ConnectFourJudge" do
        allow(player1).to receive(:gets).and_return('0')
        allow(player2).to receive(:gets).and_return('1')
 
-       expect{a_judge.judge_game}.to output("John is the winner!").to_stdout
+       expect{a_judge.judge_game}.to output(/John is the winner!/).to_stdout
+     end
+   end
+
+   context "Player1 choose column 1 four times and Player2 choses column 2 three times" do
+     it "Player1 wins" do
+       allow(player1).to receive(:gets).and_return('1')
+       allow(player2).to receive(:gets).and_return('2')
+
+       expect{a_judge.judge_game}.to output(/John is the winner!/).to_stdout
+     end
+   end
+
+   context "Player1 choose column 2 four times and Player2 choses column 3 three times" do
+     it "Player1 wins" do
+       allow(player1).to receive(:gets).and_return('2')
+       allow(player2).to receive(:gets).and_return('3')
+
+       expect{a_judge.judge_game}.to output(/John is the winner!/).to_stdout
+     end
+   end
+
+   context "Player1 choose column 3 four times and Player2 choses column 0 three times" do
+     it "Player1 wins" do
+       allow(player1).to receive(:gets).and_return('3')
+       allow(player2).to receive(:gets).and_return('0')
+
+       expect{a_judge.judge_game}.to output(/John is the winner!/).to_stdout
      end
    end
   end
