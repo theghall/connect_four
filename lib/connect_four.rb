@@ -175,14 +175,12 @@ END_HELP
     def row_wins?(token)
       row_wins = false
 
-      for x in 0..5 
-        num_in_row = board.board.flatten.each_with_index.select \
-          { |t,i| t == token && i.between?(0 + (x * 7), 6 + (x * 7))}.length
+      regexp = token * 4
 
-        row_wins = (num_in_row == 4)
+      board.board.each do |row|
+        row_wins = !(row.join =~ /#{regexp}/).nil?
 
         break if row_wins
-
       end
 
       row_wins
