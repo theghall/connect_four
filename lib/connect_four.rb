@@ -9,11 +9,11 @@ module ConnectFour
     attr_reader :board
 
    def initialize
-     @board = Array.new(4) {Array.new(4, '.')}
+     @board = Array.new(6) {Array.new(7, '.')}
    end
 
    def place_token(token, col)
-     raise ArgumentError.new("Col must be between 0 and 3") unless valid_pos?(col)
+     raise ArgumentError.new("Col must be between 0 and 6") unless valid_pos?(col)
 
      placed_token = false
 
@@ -32,8 +32,8 @@ module ConnectFour
    end
 
    def display
-     puts("0123")
-     puts("----")
+     puts("0123456")
+     puts("-------")
      board.each do |row|
        row.each do |e|
          print(e)
@@ -47,7 +47,7 @@ module ConnectFour
    attr_writer :board
 
    def valid_pos?(col)
-     return col.between?(0, 3)
+     return col.between?(0, 6)
    end
   end
 
@@ -101,10 +101,10 @@ module ConnectFour
     end
 
     def valid_move?(col)
-      col.between?(0,3) && !col_full?(col) 
+      col.between?(0,6) && !col_full?(col) 
     end
 
-    def judge_game
+    def officiate
       game_over = false
 
       winner = false
@@ -157,9 +157,11 @@ END_HELP
     def col_wins?(token)
       col_wins = false
 
-      for x in 0..3
+      for x in 0..6
         num_in_col = board.board.flatten.each_with_index.select \
-          { |t,i| t == token && (i == 0 + x || i == 4 + x || i == 8 + x || i == 12 + x) }.length
+          { |t,i| t == token && (i == 0 + x || i == 7 + x || i == 14 + x \
+                                 || i == 21 + x || i == 28 + x \
+                                 || i == 35 + x) }.length
 
         col_wins = (num_in_col == 4)
 
@@ -173,9 +175,9 @@ END_HELP
     def row_wins?(token)
       row_wins = false
 
-      for x in 0..3 
+      for x in 0..5 
         num_in_row = board.board.flatten.each_with_index.select \
-          { |t,i| t == token && i.between?(0 + (x * 4), 3 + (x * 4))}.length
+          { |t,i| t == token && i.between?(0 + (x * 7), 6 + (x * 7))}.length
 
         row_wins = (num_in_row == 4)
 

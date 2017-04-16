@@ -7,5 +7,5 @@ board = ConnectFour::ConnectFourBoard.new
 
 judge = ConnectFour::ConnectFourJudge.new(board, player1, player2)
 
-judge.judge_game
+judge.officiate
 

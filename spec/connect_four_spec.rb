@@ -1,5 +1,4 @@
-# connect-four.spec
-#
+# connect-four.spe
 # 20170408 GH
 require 'connect_four'
 
@@ -151,7 +150,7 @@ describe "ConnectFourJudge" do
   let(:player2) {ConnectFour::ConnectFourPlayer.new('Jane','R')}
   let(:a_judge) {ConnectFour::ConnectFourJudge.new(a_board, player1, player2)} 
 
-  it {expect(a_judge).to respond_to(:judge_game)}
+  it {expect(a_judge).to respond_to(:officiate)}
   it {expect(a_judge).to respond_to(:valid_move?)}
   it {expect(a_judge).to respond_to(:help)}
  end
@@ -254,7 +253,7 @@ describe "ConnectFourJudge" do
        allow(player1).to receive(:gets).and_return('0')
        allow(player2).to receive(:gets).and_return('1')
 
-       expect{a_judge.judge_game}.to output(/John is the winner!/).to_stdout
+       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
      end
    end
 
@@ -263,7 +262,7 @@ describe "ConnectFourJudge" do
        allow(player1).to receive(:gets).and_return('1')
        allow(player2).to receive(:gets).and_return('2')
 
-       expect{a_judge.judge_game}.to output(/John is the winner!/).to_stdout
+       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
      end
    end
 
@@ -272,7 +271,7 @@ describe "ConnectFourJudge" do
        allow(player1).to receive(:gets).and_return('2')
        allow(player2).to receive(:gets).and_return('3')
 
-       expect{a_judge.judge_game}.to output(/John is the winner!/).to_stdout
+       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
      end
    end
 
@@ -281,8 +280,17 @@ describe "ConnectFourJudge" do
        allow(player1).to receive(:gets).and_return('3')
        allow(player2).to receive(:gets).and_return('0')
 
-       expect{a_judge.judge_game}.to output(/John is the winner!/).to_stdout
+       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
      end
    end
-  end
+
+   context "A sequence of moves that gives player 1 a win in row 1" do
+     it "Player1 wins" do
+       allow(player1).to receive(:gets).and_return('0','1','2','3')
+       allow(player2).to receive(:gets).and_return('0','1','2')
+
+       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
+     end
+   end
+ end
 end
