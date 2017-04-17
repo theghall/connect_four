@@ -61,30 +61,48 @@ module ConnectFour
    end
 
    def take_turn(board, judge)
+     input = nil
+
      loop do
+       puts('You can enter /help or /quit at anytime.')
+
        print("#{name}, please enter col: ")
 
-       col = gets.chomp
+       input = gets.chomp.downcase
 
-       begin
-         token_placed = board.place_token(token, col.to_i) if judge.valid_move?(col.to_i)
+       valid_command = valid_command?(input) if input[0].eql?('/')
 
-         puts("That column is full, choose another.") unless token_placed
-       rescue ArgumenError => e
-         puts('Enter a valid column')
+       if !valid_command
+         begin
+           token_placed = judge.place_piece(token, input.to_i)
+
+           puts("That column is full, choose another.") unless token_placed
+         rescue ArgumenError => e
+           puts('Enter a valid column')
+         end
+       else
+         ask_again = judge.do_command(input[1..-1])
        end
 
-       break if token_placed
+       break if token_placed || !ask_again
      end 
+
+     input.to_i
    end
 
    private
   
    attr_writer :name, :token
+
+   def valid_command?(command)
+     command = command[1..-1]
+
+     %w(help quit).include?(command)
+   end
   end
 
   class ConnectFourJudge
-    attr_reader :board, :player1, :player2, :turn
+    attr_reader :board, :player1, :player2, :active_player, :turn
 
     def initialize(board, player1, player2)
       @board = board
@@ -92,8 +110,12 @@ module ConnectFour
       @player1 = player1
 
       @player2 = player2
+      
+      @active_player = player1
 
       @game_over = false
+
+      @player_quit = false
 
       @turn = 0
 
@@ -105,24 +127,26 @@ module ConnectFour
     end
 
     def officiate
-      game_over = false
-
       winner = false
+
+      draw = false
 
       active_player = player1
 
-      while !game_over
+      while !game_over?
         board.display
 
-        active_player.take_turn(board, self)
+        col = active_player.take_turn(board, self)
 
-        self.turn = self.turn + 1
+        if !player_quit
+          self.turn = self.turn + 1
 
-        winner = winner?(active_player.token)
+          winner = winner?(active_player.token, col)
 
-        draw = (turn == 16 && !winner)
+          draw = (turn == 42 && !winner)
+        end
 
-        game_over = winner || draw
+        self.game_over = winner || draw || player_quit
 
         active_player = (active_player == player1 ? player2 : player1) unless game_over
       end
@@ -131,9 +155,37 @@ module ConnectFour
 
       if winner
         puts("#{active_player.name} is the winner!")
-      else
+      elsif draw
         puts("The game is a draw!")
+      else
+        puts("#{active_player.name}, thanks for playing!")
       end
+    end
+
+    def place_piece(token, col)
+      place_piece = false
+
+      if valid_move?(col)
+        board.place_token(token, col)
+        place_piece = true
+      end
+
+      place_piece
+    end
+
+    def do_command(command)
+      ask_again = false
+
+      case command
+      when "help"
+        self.help
+        ask_again = true
+      when "quit"
+        self.quit
+        ask_again = false
+      end
+
+      ask_again
     end
 
     def help
@@ -148,28 +200,31 @@ game is a draw.
 END_HELP
     end
 
+    def quit
+      @player_quit = true
+    end
+
     private
 
-    attr_accessor :winner, :game_over
+    attr_accessor :winner, :game_over, :player_quit
 
-    attr_writer :board, :player1, :player2, :turn
+    attr_writer :board, :player1, :player2, :active_player, :turn
 
-    def col_wins?(token)
+    def game_over?
+      game_over == true
+    end
+
+    def col_wins?(token, col)
       col_wins = false
 
-      for x in 0..6
-        num_in_col = board.board.flatten.each_with_index.select \
-          { |t,i| t == token && (i == 0 + x || i == 7 + x || i == 14 + x \
-                                 || i == 21 + x || i == 28 + x \
-                                 || i == 35 + x) }.length
+      regexp = token * 4
 
-        col_wins = (num_in_col == 4)
-
-        break if col_wins
-
+      col_string = ''
+      (0..5).each do |row|
+        col_string += board.board[row][col]
       end
 
-      col_wins
+      col_wins = !(col_string =~ /#{regexp}/).nil?
     end
 
     def row_wins?(token)
@@ -186,32 +241,31 @@ END_HELP
       row_wins
     end
 
-    def diagonal_wins?(token)
+    def diagonal_wins?(token, col)
       diag_wins = false
 
-      num_in_diagonal = board.board.flatten.each_with_index.select \
-        { |t,i| t == token && (i == 0 || i == 5 || i == 10 || i == 15) }.length
+      row = find_top_row(col)
 
-      diag_wins = (num_in_diagonal == 4)
-
-      if !diag_wins
-        num_in_diagonal = board.board.flatten.each_with_index.select \
-          { |t,i| t == token && (i == 3 || i == 6 || i == 9 || i == 12) }.length
-
-        diag_wins = (num_in_diagonal == 4)
-      end
-         
       diag_wins
     end
 
-    def winner?(token)
+    def find_top_row(col)
+
+      (0..6).each do |row|
+        break if board.board[row][col] ! = '.'
+      end
+
+      row
+    end
+
+    def winner?(token, col)
       winner = false
 
       winner ||= row_wins?(token)
 
-      winner ||= col_wins?(token)
+      winner ||= col_wins?(token, col)
 
-      winner ||= diagonal_wins?(token)
+      winner ||= diagonal_wins?(token, col)
 
       winner
     end

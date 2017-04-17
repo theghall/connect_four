@@ -3,7 +3,7 @@
 require 'connect_four'
 
 describe "ConnectFourBoard" do
-  let(:c4_array) {Array.new(4) {Array.new(4, '.')}}
+  let(:c4_array) {Array.new(6) {Array.new(7, '.')}}
   let(:a_board) { ConnectFour::ConnectFourBoard.new }
 
   context "Create a new ConnectFourBoard" do
@@ -24,52 +24,21 @@ describe "ConnectFourBoard" do
 
     context "Place any color token on column 4" do
       it "raises ArgumentError" do
-         expect{a_board.place_token('B',4)}.to raise_error(ArgumentError)
+         expect{a_board.place_token('B',7)}.to raise_error(ArgumentError)
       end
     end
 
     context "Place 'B' token on column 0 times" do
       it "returns 'true' and board[3][0] == 'B'" do
         expect(a_board.place_token('B',0)).to eql(true)
-        expect(a_board.board[3][0]).to eql('B')
+        expect(a_board.board[5][0]).to eql('B')
       end
     end
 
-    context "Place 'B' token on column 0 2 times" do
-      it "returns 'true' and board[2,0],[3][0] == 'B'" do
+    context "Place 'B' token on column 0 6 times" do
+      it "returns 'false' after the sixth try" do
         expect(a_board.place_token('B',0)).to eql(true)
-        expect(a_board.board[3][0]).to eql('B')
         expect(a_board.place_token('B',0)).to eql(true)
-        expect(a_board.board[2][0]).to eql('B')
-      end
-    end
-
-    context "Place 'B' token on column 0 3 times" do
-      it "returns 'true' and board[1][0],[2][0],[3][0] == 'B'" do
-        expect(a_board.place_token('B',0)).to eql(true)
-        expect(a_board.board[3][0]).to eql('B')
-        expect(a_board.place_token('B',0)).to eql(true)
-        expect(a_board.board[2][0]).to eql('B')
-        expect(a_board.place_token('B',0)).to eql(true)
-        expect(a_board.board[1][0]).to eql('B')
-      end
-    end
-
-    context "Place 'B' token on column 0 4 times" do
-      it "returns 'true' and board[0][0],[1][0],[2][0],[3][0] == 'B'" do
-        expect(a_board.place_token('B',0)).to eql(true)
-        expect(a_board.board[3][0]).to eql('B')
-        expect(a_board.place_token('B',0)).to eql(true)
-        expect(a_board.board[2][0]).to eql('B')
-        expect(a_board.place_token('B',0)).to eql(true)
-        expect(a_board.board[1][0]).to eql('B')
-        expect(a_board.place_token('B',0)).to eql(true)
-        expect(a_board.board[0][0]).to eql('B')
-      end
-    end
-
-    context "Place 'B' token on column 0 5 times" do
-      it "returns 'false' after the fifth try" do
         expect(a_board.place_token('B',0)).to eql(true)
         expect(a_board.place_token('B',0)).to eql(true)
         expect(a_board.place_token('B',0)).to eql(true)
@@ -82,7 +51,7 @@ describe "ConnectFourBoard" do
   describe '.display' do
     context "Create a new board" do
       it "displays a 4 x 4 board of '.'" do
-        expect{a_board.display}.to output("0123\n----\n....\n....\n....\n....\n").to_stdout
+        expect{a_board.display}.to output("0123456\n-------\n.......\n.......\n.......\n.......\n.......\n.......\n").to_stdout
       end
     end
   end
@@ -110,34 +79,17 @@ describe "ConnectFourPlayer" do
 
   describe ".take_turn" do
     let(:a_board) {ConnectFour::ConnectFourBoard.new}
-    let(:a_player) {ConnectFour::ConnectFourPlayer.new('Gary', 'B')}
+    let(:player1) {ConnectFour::ConnectFourPlayer.new('John', 'B')}
+    let(:player2) {ConnectFour::ConnectFourPlayer.new('Jane', 'R')}
+    let(:a_judge) {ConnectFour::ConnectFourJudge.new(a_board, player1, player2)}
 
     context "enter a move that judge says is invalid" do
 
       it "asks for another move" do 
-        a_judge = double('ConnectFourJudge')
         allow(a_judge).to receive(:valid_move?).and_return(false, true)
-        allow(a_player).to receive(:gets).and_return('0','0')
+        allow(player1).to receive(:gets).and_return('0','0')
 
-        expect{a_player.take_turn(a_board, a_judge)}.to output(/That column is full, choose another/).to_stdout
-      end
-    end
-
-    context "enter a valid move of column 0 4 time and token 'B', board is set correctly" do
-
-      it "sets 3,0 to 'B'" do 
-        a_judge = double('ConnectFourJudge')
-        allow(a_judge).to receive(:valid_move?).and_return(true)
-        allow(a_player).to receive(:gets).and_return('0')
-
-        a_player.take_turn(a_board, a_judge)
-        expect{a_board.display}.to output("0123\n----\n....\n....\n....\nB...\n").to_stdout
-        a_player.take_turn(a_board, a_judge)
-        expect{a_board.display}.to output("0123\n----\n....\n....\nB...\nB...\n").to_stdout
-        a_player.take_turn(a_board, a_judge)
-        expect{a_board.display}.to output("0123\n----\n....\nB...\nB...\nB...\n").to_stdout
-        a_player.take_turn(a_board, a_judge)
-        expect{a_board.display}.to output("0123\n----\nB...\nB...\nB...\nB...\n").to_stdout
+        expect{player1.take_turn(a_board, a_judge)}.to output(/That column is full, choose another/).to_stdout
       end
     end
   end
@@ -202,9 +154,26 @@ describe "ConnectFourJudge" do
 
   context "when player asks for help" do
     it "dispalys help" do
-      expect{a_judge.help}.to output("Connect four is a game in which two players\ntake turns placing their tokens at the top\nof one of four columns.  The player who\ngets 4 in a row horizontally, vertically or\ndiagonally wins the game. If all the tokens\nare placed then there is no winner and the\ngame is a draw.").to_stdout
+       allow(player1).to receive(:gets).and_return('/help','/quit')
+
+      expect{a_judge.officiate}.to output(/Connect four is a game in which two players\ntake turns placing their tokens at the top\nof one of four columns.  The player who\ngets 4 in a row horizontally, vertically or\ndiagonally wins the game. If all the tokens\nare placed then there is no winner and the\ngame is a draw./).to_stdout
     end
   end
+ end
+
+ describe ".quit" do
+  let(:a_board) {ConnectFour::ConnectFourBoard.new}
+  let(:player1) {ConnectFour::ConnectFourPlayer.new('John','B')}
+  let(:player2) {ConnectFour::ConnectFourPlayer.new('Jane','R')}
+  let(:a_judge) {ConnectFour::ConnectFourJudge.new(a_board, player1, player2)} 
+
+   context "when player1 quits" do
+     it "displays 'John, thanks for playing.'" do
+       allow(player1).to receive(:gets).and_return('/quit')
+
+       expect(a_judge.officiate).to output("John, thanks for playing\n")
+     end
+   end
  end
 
  describe ".valid_move" do
@@ -225,6 +194,8 @@ describe "ConnectFourJudge" do
        a_board.place_token('B',0)
        a_board.place_token('B',0)
        a_board.place_token('B',0)
+       a_board.place_token('B',0)
+       a_board.place_token('B',0)
        expect(a_judge.valid_move?(0)).to eql(false)
      end
    end
@@ -235,54 +206,18 @@ describe "ConnectFourJudge" do
      end
    end
 
-   context "given an empty board, and column 4" do
+   context "given an empty board, and column 7" do
      it "returns false" do
-       expect(a_judge.valid_move?(4)).to eql(false)
+       expect(a_judge.valid_move?(7)).to eql(false)
      end
    end
  end
 
- describe ".take_turn" do
+ describe ".officiate" do
    let(:a_board) {ConnectFour::ConnectFourBoard.new}
    let(:player1) {ConnectFour::ConnectFourPlayer.new('John','B')}
    let(:player2) {ConnectFour::ConnectFourPlayer.new('Jane','R')}
    let(:a_judge) {ConnectFour::ConnectFourJudge.new(a_board, player1, player2)} 
-
-   context "Player1 choose column 0 four times and Player2 choses column 1 three times" do
-     it "Player1 wins" do
-       allow(player1).to receive(:gets).and_return('0')
-       allow(player2).to receive(:gets).and_return('1')
-
-       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
-     end
-   end
-
-   context "Player1 choose column 1 four times and Player2 choses column 2 three times" do
-     it "Player1 wins" do
-       allow(player1).to receive(:gets).and_return('1')
-       allow(player2).to receive(:gets).and_return('2')
-
-       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
-     end
-   end
-
-   context "Player1 choose column 2 four times and Player2 choses column 3 three times" do
-     it "Player1 wins" do
-       allow(player1).to receive(:gets).and_return('2')
-       allow(player2).to receive(:gets).and_return('3')
-
-       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
-     end
-   end
-
-   context "Player1 choose column 3 four times and Player2 choses column 0 three times" do
-     it "Player1 wins" do
-       allow(player1).to receive(:gets).and_return('3')
-       allow(player2).to receive(:gets).and_return('0')
-
-       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
-     end
-   end
 
    context "A sequence of moves that gives player 1 a win in row 1" do
      it "Player1 wins" do
@@ -292,5 +227,69 @@ describe "ConnectFourJudge" do
        expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
      end
    end
+
+   context "given a sequence of moves with 4 of same token in one row, non-consecutive" do
+     it "does not result in a win" do
+       allow(player1).to receive(:gets).and_return('0','2','4','6')
+       allow(player2).to receive(:gets).and_return('1','3','5','/quit')
+
+       expect{a_judge.officiate}.to output(/Jane, thanks for playing/)
+     end
+   end
+
+   context "A sequence of moves that gives player1 a win in col 0" do
+     it "Player1 wins" do
+       allow(player1).to receive(:gets).and_return('0','0','0','0')
+       allow(player2).to receive(:gets).and_return('1','1','1')
+
+       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
+     end
+   end
+
+   context "given a sequence of moves with 4 of same token in one column, non-consecutive" do
+     it "does not result in a win" do
+       allow(player1).to receive(:gets).and_return('0','0','0','0')
+       allow(player2).to receive(:gets).and_return('0','0','0','/quit')
+
+       expect{a_judge.officiate}.to output(/Jane, thanks for playing/)
+     end
+   end
+
+   context "given a sequence of moves that gives player1 a diagonal win, left down to right" do
+     it "Player1 wins" do
+       allow(player1).to receive(:gets).and_return('0','1','2','2','3','3')
+       allow(player2).to receive(:gets).and_return('1','2','3','3','4')
+
+       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
+     end
+   end
+
+   context "given a sequence of moves that gives player1 a diagonal win, right down to left" do
+     it "Player1 wins" do
+       allow(player1).to receive(:gets).and_return('6','5','4','4','3','3')
+       allow(player2).to receive(:gets).and_return('5','4','3','3','0')
+
+       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
+
+     end
+   end
+
+  context "given a sequence of moves, 4 non-consective equal tokens" do
+    it "does not give a win" do
+       allow(player1).to receive(:gets).and_return('0','2','2','2','3','4','4','4','5','5','5')
+       allow(player2).to receive(:gets).and_return('1','1','3','3','3','4','4','5','5','5','/quit')
+
+       expect{a_judge.officiate}.to output(/Jane, thanks for playing/).to_stdout
+    end
+  end
+
+  context "given a sequence of moves that ends in a draw" do
+    it "displays 'The game is a draw'" do
+       allow(player1).to receive(:gets).and_return('0','0','0','6','1','1','1','2','2','2','6','3','3','3','4','4','4','6','5','5','5')
+       allow(player2).to receive(:gets).and_return('0','0','0','1','1','1','6','2','2','2','3','3','3','6','4','4','4','5','5','5','6')
+
+       expect{a_judge.officiate}.to output(/The game is a draw/).to_stdout
+    end
+  end
  end
 end
