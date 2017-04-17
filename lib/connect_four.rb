@@ -252,7 +252,8 @@ END_HELP
     def get_diag_dir1(row, col)
       crow = srow = normalize_up(row - 3)
 
-      ccol = scol = normalize_up(col - 3)
+      # when row <= 2, less than 4 spaces to left
+      ccol = scol = row > 2 ? col - 3 : col - row
 
       # :TODO fix so ccol not > 6
       erow = normalize_down(row + 3, 5)

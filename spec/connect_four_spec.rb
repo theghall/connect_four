@@ -256,16 +256,14 @@ describe "ConnectFourJudge" do
      end
    end
 
-   context "given a sequence of moves that gives player1 a diagonal win, left down to right" do
+   context "given a sequence of moves that gives player1 a diagonal win" do
      it "Player1 wins" do
        allow(player1).to receive(:gets).and_return('0','1','2','2','3','3','3')
        allow(player2).to receive(:gets).and_return('1','2','3','3','0','0')
 
        expect{a_judge.officiate}.to output(/\.\.\.\.\.\.\.\n\.\.\.\.\.\.\.\n\.\.\.B\.\.\.\n\.\.BB\.\.\.\nRBBR\.\.\.\nBRRR\.\.\.\nJohn is the winner!/).to_stdout
      end
-   end
 
-   context "given a sequence of moves that gives player1 a diagonal win, right down to left" do
      it "Player1 wins" do
        allow(player1).to receive(:gets).and_return('6','5','4','4','3','3')
        allow(player2).to receive(:gets).and_return('5','4','3','3','0')
@@ -273,6 +271,22 @@ describe "ConnectFourJudge" do
        expect{a_judge.officiate}.to output(/\.\.\.\.\.\.\.\n\.\.\.\.\.\.\.\n\.\.\.B\.\.\.\n\.\.\.BB\.\.\n\.\.\.RBB\.\nR\.\.RRRB\nJohn is the winner!/).to_stdout
 
      end
+
+     it "Player1 wins" do
+       allow(player1).to receive(:gets).and_return('0','0','0','0','1','1','1','2','2','3','3')
+       allow(player2).to receive(:gets).and_return('0','0','6','1','1','6','2','2','3','6')
+
+       expect{a_judge.officiate}.to output(/B\.\.\.\.\.\.\nBB\.\.\.\.\.\nRBB\.\.\.\.\nBRRB\.\.R\nRBBB\.\.R\nBRRR\.\.R\nJohn is the winner!/).to_stdout
+     end
+
+     it "Player1 wins" do
+       allow(player1).to receive(:gets).and_return('6','6','6','6','5','5','4','4','3','3')
+       allow(player2).to receive(:gets).and_return('6','6','5','5','5','4','4','3','0')
+
+       expect{a_judge.officiate}.to output(/\.\.\.\.\.\.B\n\.\.\.\.\.BB\n\.\.\.\.BRR\n\.\.\.BRBB\n\.\.\.BBRR\nR\.\.RRRB\nJohn is the winner!/).to_stdout
+
+     end
+
    end
 
   context "given a sequence of moves, 4 non-consective equal tokens" do
