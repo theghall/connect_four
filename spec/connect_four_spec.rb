@@ -1,6 +1,7 @@
 # connect-four.spe
 # 20170408 GH
 require 'connect_four'
+require 'byebug'
 
 describe "ConnectFourBoard" do
   let(:c4_array) {Array.new(6) {Array.new(7, '.')}}
@@ -168,10 +169,10 @@ describe "ConnectFourJudge" do
   let(:a_judge) {ConnectFour::ConnectFourJudge.new(a_board, player1, player2)} 
 
    context "when player1 quits" do
-     it "displays 'John, thanks for playing.'" do
+     it "displays 'John, thanks for playing'" do
        allow(player1).to receive(:gets).and_return('/quit')
 
-       expect(a_judge.officiate).to output("John, thanks for playing\n")
+       expect{a_judge.officiate}.to output(/John, thanks for playing/).to_stdout
      end
    end
  end
@@ -233,7 +234,7 @@ describe "ConnectFourJudge" do
        allow(player1).to receive(:gets).and_return('0','2','4','6')
        allow(player2).to receive(:gets).and_return('1','3','5','/quit')
 
-       expect{a_judge.officiate}.to output(/Jane, thanks for playing/)
+       expect{a_judge.officiate}.to output(/Jane, thanks for playing/).to_stdout
      end
    end
 
@@ -251,16 +252,16 @@ describe "ConnectFourJudge" do
        allow(player1).to receive(:gets).and_return('0','0','0','0')
        allow(player2).to receive(:gets).and_return('0','0','0','/quit')
 
-       expect{a_judge.officiate}.to output(/Jane, thanks for playing/)
+       expect{a_judge.officiate}.to output(/Jane, thanks for playing/).to_stdout
      end
    end
 
    context "given a sequence of moves that gives player1 a diagonal win, left down to right" do
      it "Player1 wins" do
-       allow(player1).to receive(:gets).and_return('0','1','2','2','3','3')
-       allow(player2).to receive(:gets).and_return('1','2','3','3','4')
+       allow(player1).to receive(:gets).and_return('0','1','2','2','3','3','3')
+       allow(player2).to receive(:gets).and_return('1','2','3','3','0','0')
 
-       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
+       expect{a_judge.officiate}.to output(/\.\.\.\.\.\.\.\n\.\.\.\.\.\.\.\n\.\.\.B\.\.\.\n\.\.BB\.\.\.\nRBBR\.\.\.\nBRRR\.\.\.\nJohn is the winner!/).to_stdout
      end
    end
 
@@ -269,7 +270,7 @@ describe "ConnectFourJudge" do
        allow(player1).to receive(:gets).and_return('6','5','4','4','3','3')
        allow(player2).to receive(:gets).and_return('5','4','3','3','0')
 
-       expect{a_judge.officiate}.to output(/John is the winner!/).to_stdout
+       expect{a_judge.officiate}.to output(/\.\.\.\.\.\.\.\n\.\.\.\.\.\.\.\n\.\.\.B\.\.\.\n\.\.\.BB\.\.\n\.\.\.RBB\.\nR\.\.RRRB\nJohn is the winner!/).to_stdout
 
      end
    end
@@ -286,7 +287,7 @@ describe "ConnectFourJudge" do
   context "given a sequence of moves that ends in a draw" do
     it "displays 'The game is a draw'" do
        allow(player1).to receive(:gets).and_return('0','0','0','6','1','1','1','2','2','2','6','3','3','3','4','4','4','6','5','5','5')
-       allow(player2).to receive(:gets).and_return('0','0','0','1','1','1','6','2','2','2','3','3','3','6','4','4','4','5','5','5','6')
+       allow(player2).to receive(:gets).and_return('0','0','0','1','1','1','6','2','2','2','6','3','3','6','4','4','4','5','5','5','3')
 
        expect{a_judge.officiate}.to output(/The game is a draw/).to_stdout
     end

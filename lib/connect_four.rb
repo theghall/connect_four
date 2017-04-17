@@ -239,6 +239,67 @@ END_HELP
       end
 
       row_wins
+    end 
+
+    def normalize_up(num)
+      num < 0 ? 0 : num
+    end
+
+    def normalize_down(num, target)
+      num > target ? target : num
+    end
+
+    def get_diag_dir1(row, col)
+      crow = srow = normalize_up(row - 3)
+
+      ccol = scol = normalize_up(col - 3)
+
+      # :TODO fix so ccol not > 6
+      erow = normalize_down(row + 3, 5)
+
+      diag = "" 
+
+      while crow <= erow do
+        diag += board.board[crow][ccol]
+
+        crow += 1
+
+        ccol += 1
+        
+        break if ccol > 6
+      end
+
+      diag
+    end
+
+    def get_diag_dir2(row, col)
+      crow = srow = normalize_down(row + 3, 5)
+
+      ccol = scol = normalize_up(col - 3)
+
+      # :TODO fix so ccol not > 6
+      erow = normalize_up(row - 3)
+
+      diag = "" 
+
+      while crow >= erow do
+        diag += board.board[crow][ccol]
+
+        crow -= 1
+
+        ccol += 1
+
+        break if ccol > 6
+      end
+
+      diag
+    end
+
+    def check_diag(token, diag)
+
+      regexp = token * 4
+
+      diag_wins = !(diag =~ /#{regexp}/).nil?
     end
 
     def diagonal_wins?(token, col)
@@ -246,16 +307,20 @@ END_HELP
 
       row = find_top_row(col)
 
-      diag_wins
+      diag_wins = check_diag(token, get_diag_dir1(row, col))
+       
+      diag_wins ||= check_diag(token, get_diag_dir2(row,col))
     end
 
     def find_top_row(col)
+      crow = 5
 
       (0..6).each do |row|
-        break if board.board[row][col] ! = '.'
+        crow = row
+        break if board.board[row][col] != '.'
       end
 
-      row
+      crow
     end
 
     def winner?(token, col)
