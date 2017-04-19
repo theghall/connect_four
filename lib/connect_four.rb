@@ -4,103 +4,107 @@
 #
 require 'byebug'
 module ConnectFour
-
+  # Set up a Connect Four Board and interact with it
   class ConnectFourBoard
     attr_reader :board
 
-   def initialize
-     @board = Array.new(6) {Array.new(7, '.')}
-   end
+    def initialize
+      @board = Array.new(6) { Array.new(7, '.') }
+    end
 
-   def place_token(token, col)
-     raise ArgumentError.new("Col must be between 0 and 6") unless valid_pos?(col)
+    def place_token(token, col)
+      raise ArgumentError.new('Col must be between 0 and 6') \
+        unless valid_pos?(col)
 
-     placed_token = false
+      placed_token = false
 
-     last_empty_pos = -1
+      last_empty_pos = -1
 
-     board.each_with_index do |row, index|
-       last_empty_pos = index if row[col] == '.'
-     end
+      board.each_with_index do |row, index|
+        last_empty_pos = index if row[col] == '.'
+      end
 
-     if last_empty_pos != -1
-       board[last_empty_pos][col] = token
-       placed_token = true
-     end
+      if last_empty_pos != -1
+        board[last_empty_pos][col] = token
+        placed_token = true
+      end
 
-     placed_token
-   end
+      placed_token
+    end
 
-   def display
-     puts("0123456")
-     puts("-------")
-     board.each do |row|
-       row.each do |e|
-         print(e)
-       end
-       puts
-     end
-   end
+    def display
+      puts('Connect Four')
+      puts('0123456')
+      puts('-------')
+      board.each do |row|
+        row.each do |e|
+          print(e)
+        end
+        puts
+      end
+    end
 
-   private
+    private
 
-   attr_writer :board
+    attr_writer :board
 
-   def valid_pos?(col)
-     return col.between?(0, 6)
-   end
+    def valid_pos?(col)
+      col.between?(0, 6)
+    end
   end
 
+  # Allows player to interact with game
   class ConnectFourPlayer
-   attr_reader :name, :token
+    attr_reader :name, :token
 
-   def initialize(name, token)
-     @name = name
-    
-     @token = token
-   end
+    def initialize(name, token)
+      @name = name
 
-   def take_turn(board, judge)
-     input = nil
+      @token = token
+    end
 
-     loop do
-       puts('You can enter /help or /quit at anytime.')
+    def take_turn(judge)
+      input = nil
 
-       print("#{name}, please enter col: ")
+      loop do
+        puts('You can enter /help or /quit at anytime.')
 
-       input = gets.chomp.downcase
+        print("#{name}, please enter col: ")
 
-       valid_command = valid_command?(input) if input[0].eql?('/')
+        input = gets.chomp.downcase
 
-       if !valid_command
-         begin
-           token_placed = judge.place_piece(token, input.to_i)
+        valid_command = valid_command?(input) if input[0].eql?('/')
 
-           puts("That column is full, choose another.") unless token_placed
-         rescue ArgumenError => e
-           puts('Enter a valid column')
-         end
-       else
-         ask_again = judge.do_command(input[1..-1])
-       end
+        if !valid_command
+          begin
+            token_placed = judge.place_piece(token, input.to_i)
 
-       break if token_placed || !ask_again
-     end 
+            puts('That column is full, choose another.') unless token_placed
+          rescue ArgumenError => e
+            puts('Enter a valid column')
+          end
+        else
+          ask_again = judge.do_command(input[1..-1])
+        end
 
-     input.to_i
-   end
+        break if token_placed || !ask_again
+      end
 
-   private
-  
-   attr_writer :name, :token
+      input.to_i
+    end
 
-   def valid_command?(command)
-     command = command[1..-1]
+    private
 
-     %w(help quit).include?(command)
-   end
+    attr_writer :name, :token
+
+    def valid_command?(command)
+      command = command[1..-1]
+
+      %w(help quit).include?(command)
+    end
   end
 
+  # Officiates a Connect Four game
   class ConnectFourJudge
     attr_reader :board, :player1, :player2, :active_player, :turn
 
@@ -110,7 +114,7 @@ module ConnectFour
       @player1 = player1
 
       @player2 = player2
-      
+
       @active_player = player1
 
       @game_over = false
@@ -123,23 +127,19 @@ module ConnectFour
     end
 
     def valid_move?(col)
-      col.between?(0,6) && !col_full?(col) 
+      col.between?(0, 6) && !col_full?(col)
     end
 
     def officiate
-      winner = false
-
       draw = false
 
-      active_player = player1
-
-      while !game_over?
+      until game_over?
         board.display
 
-        col = active_player.take_turn(board, self)
+        col = self.active_player.take_turn(self)
 
-        if !player_quit
-          self.turn = self.turn + 1
+        unless player_quit
+          self.turn = turn + 1
 
           winner = winner?(active_player.token, col)
 
@@ -148,7 +148,7 @@ module ConnectFour
 
         self.game_over = winner || draw || player_quit
 
-        active_player = (active_player == player1 ? player2 : player1) unless game_over
+        swap_active_player unless game_over
       end
 
       board.display
@@ -156,7 +156,7 @@ module ConnectFour
       if winner
         puts("#{active_player.name} is the winner!")
       elsif draw
-        puts("The game is a draw!")
+        puts('The game is a draw!')
       else
         puts("#{active_player.name}, thanks for playing!")
       end
@@ -174,14 +174,14 @@ module ConnectFour
     end
 
     def do_command(command)
-      ask_again = false
+      ask_again = true
 
       case command
-      when "help"
-        self.help
+      when 'help'
+        help
         ask_again = true
-      when "quit"
-        self.quit
+      when 'quit'
+        quit
         ask_again = false
       end
 
@@ -214,9 +214,11 @@ END_HELP
       game_over == true
     end
 
-    def col_wins?(token, col)
-      col_wins = false
+    def swap_active_player
+      @active_player = (active_player == player1 ? player2 : player1)
+    end
 
+    def col_wins?(token, col)
       regexp = token * 4
 
       col_string = ''
@@ -224,7 +226,7 @@ END_HELP
         col_string += board.board[row][col]
       end
 
-      col_wins = !(col_string =~ /#{regexp}/).nil?
+      !(col_string =~ /#{regexp}/).nil?
     end
 
     def row_wins?(token)
@@ -239,7 +241,7 @@ END_HELP
       end
 
       row_wins
-    end 
+    end
 
     def normalize_up(num)
       num < 0 ? 0 : num
@@ -258,15 +260,15 @@ END_HELP
       # :TODO fix so ccol not > 6
       erow = normalize_down(row + 3, 5)
 
-      diag = "" 
+      diag = ''
 
-      while crow <= erow do
+      while crow <= erow
         diag += board.board[crow][ccol]
 
         crow += 1
 
         ccol += 1
-        
+
         break if ccol > 6
       end
 
@@ -282,9 +284,9 @@ END_HELP
       # :TODO fix so ccol not > 6
       erow = normalize_up(row - 3)
 
-      diag = "" 
+      diag = ''
 
-      while crow >= erow do
+      while crow >= erow
         diag += board.board[crow][ccol]
 
         crow -= 1
@@ -298,20 +300,17 @@ END_HELP
     end
 
     def check_diag(token, diag)
-
       regexp = token * 4
 
-      diag_wins = !(diag =~ /#{regexp}/).nil?
+      !(diag =~ /#{regexp}/).nil?
     end
 
     def diagonal_wins?(token, col)
-      diag_wins = false
-
       row = find_top_row(col)
 
       diag_wins = check_diag(token, get_diag_dir1(row, col))
-       
-      diag_wins ||= check_diag(token, get_diag_dir2(row,col))
+
+      diag_wins ||= check_diag(token, get_diag_dir2(row, col))
     end
 
     def find_top_row(col)

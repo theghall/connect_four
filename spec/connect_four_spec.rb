@@ -52,7 +52,7 @@ describe "ConnectFourBoard" do
   describe '.display' do
     context "Create a new board" do
       it "displays a 4 x 4 board of '.'" do
-        expect{a_board.display}.to output("0123456\n-------\n.......\n.......\n.......\n.......\n.......\n.......\n").to_stdout
+        expect{a_board.display}.to output("Connect Four\n0123456\n-------\n.......\n.......\n.......\n.......\n.......\n.......\n").to_stdout
       end
     end
   end
@@ -90,7 +90,7 @@ describe "ConnectFourPlayer" do
         allow(a_judge).to receive(:valid_move?).and_return(false, true)
         allow(player1).to receive(:gets).and_return('0','0')
 
-        expect{player1.take_turn(a_board, a_judge)}.to output(/That column is full, choose another/).to_stdout
+        expect{player1.take_turn(a_judge)}.to output(/That column is full, choose another/).to_stdout
       end
     end
   end
